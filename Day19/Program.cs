@@ -1,0 +1,1 @@
+﻿string[] input = File.ReadAllLines("input.txt");
