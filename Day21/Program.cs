@@ -31,45 +31,32 @@ List<Item> rings =
     new("Defense +3", 80, 0, 3)
 ];
 
-DisplayItems();
+int leastGoldAndStillWin = int.MaxValue;
+int mostGoldAndStillLose = int.MinValue;
 
-PartOne();
-// PartTwo();
-
-void PartOne()
+foreach (Item weapon in weapons)
 {
-    int leastGoldAndStillWin = int.MaxValue;
-    int mostGoldAndStillLose = int.MinValue;
-    
-    foreach (Item weapon in weapons)
+    foreach (Item armour in armours.Concat([Item.Empty]))
     {
-        foreach (Item armour in armours.Concat([Item.Empty]))
+        // Compute weapon + armour + 0 ring
+        DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour);
+
+        foreach (Item ring in rings)
         {
-            // Compute weapon + armour + 0 ring
-            DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour);
+            // Compute weapon + armour + 1 ring
+            DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour, ring);
 
-            foreach (Item ring in rings)
+            foreach (Item ring2 in rings.Where(ring2 => !ring.Name.Equals(ring2.Name)))
             {
-                // Compute weapon + armour + 1 ring
-                DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour, ring);
-
-                foreach (Item ring2 in rings.Where(ring2 => !ring.Name.Equals(ring2.Name)))
-                {
-                    // Compute weapon + armour + 2 ring
-                    DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour, ring, ring2);
-                }
+                // Compute weapon + armour + 2 ring
+                DetermineOutcome(ref leastGoldAndStillWin, ref mostGoldAndStillLose, weapon, armour, ring, ring2);
             }
         }
     }
-
-    Console.WriteLine($"P1 the least amount of gold spent and still win = {leastGoldAndStillWin}");
-    Console.WriteLine($"P2 the most amount of gold spent and still lose = {mostGoldAndStillLose}");
 }
 
-void PartTwo()
-{
-    Console.WriteLine($"P2  ...");
-}
+Console.WriteLine($"P1 the least amount of gold spent and still win = {leastGoldAndStillWin}");
+Console.WriteLine($"P2 the most amount of gold spent and still lose = {mostGoldAndStillLose}");
 
 void DetermineOutcome(ref int leastGold, ref int mostGold, params Item[] itemsUsed)
 {
@@ -94,76 +81,12 @@ void DetermineOutcome(ref int leastGold, ref int mostGold, params Item[] itemsUs
     {
         leastGold = totalCost;
     }
-    
+
     if (bossTurnsToKill < playerTurnsToKill && totalCost > mostGold)
     {
         mostGold = totalCost;
     }
 }
-
-
-void DisplayItems()
-{
-    int maxWeaponNameLen = weapons.Max(i => i.Name.Length);
-    int maxArmourNameLen = armours.Max(i => i.Name.Length);
-    int maxRingNameLen = rings.Max(i => i.Name.Length);
-    int largestNameLen = Math.Max(Math.Max(maxWeaponNameLen, maxArmourNameLen), maxRingNameLen);
-
-    const string COL_HEADER_COST = "Cost";
-    const string COL_HEADER_DAMAGE = "Damage";
-    const string COL_HEADER_ARMOUR = "Armour";
-    string sep = "".PadLeft(5);
-    string horizontalPadding = "".PadLeft(2);
-    string vBorder = "|";
-
-    int totalTableWidth =
-        2 * horizontalPadding.Length
-        + largestNameLen
-        + COL_HEADER_COST.Length
-        + COL_HEADER_DAMAGE.Length
-        + COL_HEADER_ARMOUR.Length
-        + sep.Length * 3
-        + 2 * vBorder.Length;
-
-    string hBorder = new('-', totalTableWidth);
-
-    Console.WriteLine(hBorder);
-    Console.Write(vBorder + horizontalPadding);
-    Console.Write("".PadLeft(largestNameLen) + sep);
-    Console.Write(COL_HEADER_COST + sep);
-    Console.Write(COL_HEADER_DAMAGE + sep);
-    Console.Write(COL_HEADER_ARMOUR);
-    Console.Write(horizontalPadding + vBorder);
-    Console.WriteLine();
-    Console.WriteLine(hBorder);
-
-    void DisplayItemsList(string name, List<Item> items)
-    {
-        Console.Write(vBorder + horizontalPadding);
-        Console.Write(name.PadRight(hBorder.Length - 2 * vBorder.Length - 2 * horizontalPadding.Length));
-        Console.Write(horizontalPadding + vBorder);
-        Console.WriteLine();
-        Console.WriteLine(hBorder);
-        foreach (Item item in items)
-        {
-            Console.Write(vBorder + horizontalPadding);
-            Console.Write(item.Name.PadRight(largestNameLen) + sep);
-            Console.Write(item.Cost.ToString().PadRight(COL_HEADER_COST.Length) + sep);
-            Console.Write(item.Damage.ToString().PadRight(COL_HEADER_DAMAGE.Length) + sep);
-            Console.Write(item.Armour.ToString().PadRight(COL_HEADER_ARMOUR.Length));
-            Console.Write(horizontalPadding + vBorder);
-            Console.WriteLine();
-        }
-    }
-
-    DisplayItemsList("Weapons", weapons);
-    Console.WriteLine(hBorder);
-    DisplayItemsList("Armour", armours);
-    Console.WriteLine(hBorder);
-    DisplayItemsList("Rings", rings);
-    Console.WriteLine(hBorder);
-}
-
 
 public readonly struct Item(string name, int cost, int damage, int armour)
 {
