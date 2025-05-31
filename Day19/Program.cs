@@ -1,20 +1,20 @@
 ﻿string[] input = File.ReadAllLines("input.txt");
-string medicineMolecule = input[^1];
-
-Dictionary<string, List<string>> substitutions = new();
-
-foreach (string substitution in input.SkipLast(1))
-{
-    string[] parts = substitution.Split(" => ");
-    substitutions.TryAdd(parts[0], new());
-    substitutions[parts[0]].Add(parts[1]);
-}
+string molecule = input[^1];
 
 PartOne();
 PartTwo();
 
 void PartOne()
 {
+    Dictionary<string, List<string>> substitutions = new();
+
+    foreach (string substitution in input.SkipLast(1))
+    {
+        string[] parts = substitution.Split(" => ");
+        substitutions.TryAdd(parts[0], new());
+        substitutions[parts[0]].Add(parts[1]);
+    }
+
     HashSet<string> distinctMolecules = new();
 
     foreach (KeyValuePair<string, List<string>> substitution in substitutions)
@@ -24,7 +24,7 @@ void PartOne()
 
         while (true)
         {
-            index = medicineMolecule.IndexOf(substitution.Key, index, StringComparison.Ordinal);
+            index = molecule.IndexOf(substitution.Key, index, StringComparison.Ordinal);
             if (index == -1)
             {
                 break;
@@ -36,8 +36,8 @@ void PartOne()
 
         foreach (int position in occurrencePositions)
         {
-            string start = medicineMolecule[..position];
-            string end = medicineMolecule[(position + substitution.Key.Length)..];
+            string start = molecule[..position];
+            string end = molecule[(position + substitution.Key.Length)..];
 
             foreach (string swapper in substitution.Value)
             {
@@ -51,6 +51,18 @@ void PartOne()
 
 void PartTwo()
 {
-    int fewestSteps = int.MaxValue;
-    Console.WriteLine($"P2 fewest number of steps to go from e to the medicine molecule = {fewestSteps}");
+    int CountStr(string x)
+    {
+        int count = 0;
+        for (int index = molecule.IndexOf(x, StringComparison.Ordinal); index >= 0; index = molecule.IndexOf(x, index + 1, StringComparison.Ordinal))
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    var num = molecule.Count(char.IsUpper) - CountStr("Rn") - CountStr("Ar") - 2 * CountStr("Y") - 1;
+    
+    Console.WriteLine($"P2 fewest number of steps to go from e to the medicine molecule = {num}");
 }
